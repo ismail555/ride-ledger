@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
   const date = req.nextUrl.searchParams.get('date')
   if (!date) return NextResponse.json({ error: 'date required' }, { status: 400 })
   try {
-    const rows = await sql`SELECT * FROM calorie_log WHERE date = ${date} LIMIT 1`
+    const rows = await sql`SELECT * FROM calorie_log WHERE date = ${date} LIMIT 1` as any[]
     return NextResponse.json(rows[0] ?? null)
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })

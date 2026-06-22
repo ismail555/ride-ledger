@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
       const existing = await sql`
         SELECT id FROM cycling_sessions WHERE apple_health_uuid = ${w.apple_health_uuid}
-      `
+      ` as any[]
       const action = existing.length > 0 ? 'updated' : 'inserted'
 
       await sql`
