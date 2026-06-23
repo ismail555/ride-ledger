@@ -1506,3 +1506,146 @@ body {
   font-size: 0.62rem;
   color: var(--muted);
 }
+
+/* ── Weekly Energy Balance ──────────────────────────────────────────────────── */
+.week-nutrition-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.wn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.wn-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.wn-days {
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.wn-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 540px) {
+  .wn-stats { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+}
+
+.wn-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.wn-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.wn-stat-val {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.wn-stat-unit {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.wn-bar-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.wn-bar-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--muted);
+}
+
+.wn-bar-pct {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.wn-bar-track {
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+}
+
+.wn-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.wn-verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border-radius: 7px;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid;
+}
+
+.wn-ok  { background: rgba(34,211,174,0.06);  border-color: rgba(34,211,174,0.2); }
+.wn-over { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.2); }
+
+.wn-verdict-icon {
+  font-size: 0.9rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+.wn-ok   .wn-verdict-icon { color: var(--teal); }
+.wn-over .wn-verdict-icon { color: var(--red); }
+
+.wn-verdict-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wn-verdict-main {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.wn-ok   .wn-verdict-main { color: var(--teal); }
+.wn-over .wn-verdict-main { color: var(--red); }
+
+.wn-verdict-sub {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+  line-height: 1.4;
+}

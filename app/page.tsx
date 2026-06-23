@@ -27,6 +27,111 @@ interface WeekData {
   }
 }
 
+// ── Weekly Energy Balance ─────────────────────────────────────────────────────
+const KCAL_PER_KG_FAT = 7700
+
+function WeekNutritionPanel({ calories, sessions }: {
+  calories: CalorieLog[]
+  sessions: CyclingSession[]
+}) {
+  if (calories.length === 0) {
+    return (
+      <div className="week-nutrition-wrap">
+        <div className="wn-header">
+          <span className="wn-title">Weekly Energy Balance</span>
+          <span className="text-muted mono" style={{ fontSize: '0.65rem' }}>ยังไม่มีข้อมูล — log calories ก่อน</span>
+        </div>
+      </div>
+    )
+  }
+
+  const totalIn   = calories.reduce((s, c) => s + Number(c.calories), 0)
+  const totalTDEE = calories.reduce((s, c) => s + Number(c.tdee_target), 0)
+  const rideKcal  = sessions.reduce((s, r) => s + (r.kcal_burned ?? 0), 0)
+  const netDeficit = totalTDEE - totalIn           // positive = ate less than TDEE (good)
+  const netWithRide = netDeficit + rideKcal        // add back ride burn for full NEAT picture
+  const loggedDays = calories.length
+
+  // Projected if kept at this pace for full 7 days
+  const projDeficit7 = (netDeficit / loggedDays) * 7
+  const projFatG = projDeficit7 / KCAL_PER_KG_FAT * 1000
+  const projFatActual = netDeficit / KCAL_PER_KG_FAT * 1000 // already-achieved so far
+
+  const onTrack = netDeficit > 0
+  const pct = Math.min(Math.max((netDeficit / 3500) * 100, 0), 100) // 3500 = weekly target
+
+  return (
+    <div className="week-nutrition-wrap">
+      <div className="wn-header">
+        <span className="wn-title">Weekly Energy Balance</span>
+        <span className="wn-days mono">{loggedDays}/7 วัน</span>
+      </div>
+
+      {/* 4-number summary */}
+      <div className="wn-stats">
+        <div className="wn-stat">
+          <span className="wn-stat-label">กิน (รวม)</span>
+          <span className="wn-stat-val">{totalIn.toLocaleString()}</span>
+          <span className="wn-stat-unit">kcal</span>
+        </div>
+        <div className="wn-stat">
+          <span className="wn-stat-label">TDEE (รวม)</span>
+          <span className="wn-stat-val">{totalTDEE.toLocaleString()}</span>
+          <span className="wn-stat-unit">kcal</span>
+        </div>
+        <div className="wn-stat">
+          <span className="wn-stat-label">Deficit สะสม</span>
+          <span className="wn-stat-val" style={{ color: onTrack ? 'var(--teal)' : 'var(--red)' }}>
+            {onTrack ? '+' : ''}{netDeficit.toLocaleString()}
+          </span>
+          <span className="wn-stat-unit">kcal</span>
+        </div>
+        <div className="wn-stat">
+          <span className="wn-stat-label">Fat ที่เผาแล้ว</span>
+          <span className="wn-stat-val" style={{ color: onTrack ? 'var(--teal)' : 'var(--red)' }}>
+            {onTrack ? '-' : '+'}{Math.abs(projFatActual).toFixed(0)}
+          </span>
+          <span className="wn-stat-unit">g</span>
+        </div>
+      </div>
+
+      {/* Progress bar vs 3,500 kcal weekly target */}
+      <div className="wn-bar-label-row">
+        <span className="wn-bar-label">Deficit progress vs เป้า 3,500 kcal/สัปดาห์</span>
+        <span className="wn-bar-pct" style={{ color: onTrack ? 'var(--teal)' : 'var(--red)' }}>
+          {pct.toFixed(0)}%
+        </span>
+      </div>
+      <div className="wn-bar-track">
+        <div className="wn-bar-fill" style={{
+          width: `${pct}%`,
+          background: onTrack ? 'var(--teal)' : 'var(--red)',
+        }} />
+      </div>
+
+      {/* Science verdict */}
+      <div className={`wn-verdict ${onTrack ? 'wn-ok' : 'wn-over'}`}>
+        <span className="wn-verdict-icon">{onTrack ? '▼' : '▲'}</span>
+        <div className="wn-verdict-text">
+          <span className="wn-verdict-main">
+            {onTrack
+              ? `ลงแน่นอน — ถ้าคงเส้นคงวาถึงปลายสัปดาห์ คาดว่าลด ~${Math.abs(projFatG).toFixed(0)}g fat`
+              : `เกินแผน — deficit ติดลบ ไขมันสะสม ~${Math.abs(projFatActual).toFixed(0)}g สัปดาห์นี้`}
+          </span>
+          {rideKcal > 0 && (
+            <span className="wn-verdict-sub">
+              รวม ride burn {rideKcal.toLocaleString()} kcal → net energy gap {netWithRide.toLocaleString()} kcal
+            </span>
+          )}
+          <span className="wn-verdict-sub">
+            7,700 kcal = fat 1 kg · ตอนนี้ทำได้ {(netDeficit / 7700 * 1000).toFixed(0)}g จาก diet เพียงอย่างเดียว
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function GoalBar({ totalKm }: { totalKm: number }) {
   const goalPerRide = 40
   const pct = Math.min((totalKm / (goalPerRide * 4)) * 100, 100)
@@ -265,6 +370,8 @@ export default function WeeklyDashboard() {
           {data.calories.length > 0 && (
             <MacroBar data={data.calories} proteinTarget={195} />
           )}
+
+          <WeekNutritionPanel calories={data.calories} sessions={data.sessions} />
 
           <SessionsTable sessions={data.sessions} onRefresh={() => load(weekOffset)} />
         </>
