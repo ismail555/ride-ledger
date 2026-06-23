@@ -364,6 +364,80 @@ function RideForm({ date }: { date: string }) {
   )
 }
 
+// ─── Body Form ────────────────────────────────────────────────────────────────
+function BodyForm({ date }: { date: string }) {
+  const [waist, setWaist] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setSaved(false)
+    setError(null)
+    fetch(`/api/log/body?date=${date}`)
+      .then(r => r.json())
+      .then(d => { if (d?.waist) setWaist(String(d.waist)) })
+      .catch(() => {})
+  }, [date])
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!waist) return
+    setSaving(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/log/body', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date, waist_inches: Number(waist) }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setSaved(true)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSave} className="log-card body-form">
+      <div className="log-card-header">
+        <h2 className="log-section-title">📏 รอบเอว</h2>
+        <span className="text-muted mono" style={{ fontSize: '0.7rem' }}>เป้า 32" · วัดสัปดาห์ละครั้งก็พอ</span>
+      </div>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
+        <label className="input-wrap" style={{ flex: 1 }}>
+          <span className="input-label">รอบเอว (นิ้ว)</span>
+          <input
+            className="field"
+            type="number"
+            step="0.1"
+            placeholder="35.5"
+            value={waist}
+            onChange={e => { setWaist(e.target.value); setSaved(false) }}
+          />
+        </label>
+        {waist && (
+          <div className="waist-preview">
+            <span className="waist-preview-num" style={{ color: Number(waist) <= 33 ? 'var(--teal)' : 'var(--amber)' }}>
+              {waist}"
+            </span>
+            <span className="waist-preview-sub">
+              {Number(waist) > 32 ? `เหลือ ${(Number(waist) - 32).toFixed(1)}" ถึงเป้า` : '✓ ถึงเป้า!'}
+            </span>
+          </div>
+        )}
+      </div>
+      {error && <p className="form-error">⚠ {error}</p>}
+      <button type="submit" className="save-btn" disabled={saving || !waist} style={{ marginTop: '0.75rem' }}>
+        {saving ? 'Saving…' : saved ? '✓ บันทึกแล้ว' : 'บันทึกรอบเอว'}
+      </button>
+    </form>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function LogPage() {
   const [date, setDate] = useState(TODAY)
@@ -405,6 +479,7 @@ export default function LogPage() {
         <CalorieForm date={date} />
         <RideForm date={date} />
       </div>
+      <BodyForm date={date} />
     </main>
   )
 }

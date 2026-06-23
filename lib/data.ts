@@ -39,7 +39,8 @@ export async function getWeekData(weekOffset = 0) {
   const bodyLogs: BodyLog[] = (bodyRaw as any[]).map(r => ({
     ...r,
     weight: Number(r.weight),
-    waist: r.waist != null ? Number(r.waist) : null,
+    // DB stores waist in cm; convert to inches for display (1 in = 2.54 cm)
+    waist: r.waist != null ? Math.round((Number(r.waist) / 2.54) * 10) / 10 : null,
   }))
 
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
