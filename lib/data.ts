@@ -45,9 +45,12 @@ export async function getWeekData(weekOffset = 0) {
 
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
 
-  const sessionsByDate = new Map(sessions.map(s => [s.date, s]))
-  const caloriesByDate = new Map(calories.map(c => [c.date, c]))
-  const bodyByDate = new Map(bodyLogs.map(b => [b.date, b]))
+  const toLocalDate = (iso: string) =>
+    new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' })
+
+  const sessionsByDate = new Map(sessions.map(s => [toLocalDate(s.date), s]))
+  const caloriesByDate = new Map(calories.map(c => [toLocalDate(c.date), c]))
+  const bodyByDate = new Map(bodyLogs.map(b => [toLocalDate(b.date), b]))
 
   const dailyMetrics: DayMetrics[] = days.map(day => {
     const dateStr = format(day, 'yyyy-MM-dd')
